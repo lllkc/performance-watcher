@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="parser" class="com.github.watcher.ll.support.WatchAnnotationParser">
+        <property name="defaultDef" ref="default"/>
+        <property name="watchPackages" value="${watch.packages:#{''}}"/>
+    </bean>
+
+    <bean id="monitor" class="com.github.watcher.ll.interceptor.MonitorInterceptor">
+        <property name="defaultDef" ref="default"/>
+    </bean>
+
+    <bean id="default" class="com.github.watcher.ll.anotation.DefaultWatchDefinition">
+        <property name="threshold" value="${monitor.threshold:-1}"/>
+    </bean>
+
+    <bean class="com.github.watcher.ll.autoproxy.MonitorProxyCreator">
+        <property name="parser" ref="parser"/>
+        <property name="interceptors">
+            <list>
+                <ref bean="monitor"/>
+            </list>
+        </property>
+        <property name="proxyTargetClass" value="true"/>
+    </bean>
+
+</beans>
