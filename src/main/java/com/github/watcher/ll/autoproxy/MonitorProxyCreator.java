@@ -23,8 +23,13 @@ public class MonitorProxyCreator extends AbstractAutoProxyCreator {
 
     private MethodInterceptor[] interceptors;
 
+    private boolean switchOn;
+
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+        if(!switchOn) {
+            return bean;
+        }
         Object ori = bean;
         if (AopUtils.isAopProxy(bean)) {
             Object proxy = null;
@@ -73,4 +78,13 @@ public class MonitorProxyCreator extends AbstractAutoProxyCreator {
     public void setInterceptors(MethodInterceptor[] interceptors) {
         this.interceptors = interceptors;
     }
+
+    public boolean isSwitchOn() {
+        return switchOn;
+    }
+
+    public void setSwitchOn(boolean switchOn) {
+        this.switchOn = switchOn;
+    }
+
 }

@@ -18,6 +18,7 @@
 
     <bean class="com.github.watcher.ll.autoproxy.MonitorProxyCreator">
         <property name="parser" ref="parser"/>
+        <property name="switchOn" value="${watcher.enabled:true}"/>
         <property name="interceptors">
             <list>
                 <ref bean="monitor"/>
