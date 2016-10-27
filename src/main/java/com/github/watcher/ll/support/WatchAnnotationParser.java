@@ -30,23 +30,27 @@ public class WatchAnnotationParser implements Parser {
             }
         }
 
+        return withinPackage(bean);
+    }
+
+    private boolean withinPackage(Object bean) {
+        String className = bean.getClass().getName();
         String[] packages = watchPackages.split(",");
         for (String p : packages) {
-            if (withinPackage(bean, p)) {
+            if (className.equals(p) || (className.startsWith(p) && className.charAt(p.length()) == '.')) {
                 return true;
             }
         }
         return false;
     }
 
-    private boolean withinPackage(Object bean, String p) {
-        String className = bean.getClass().getName();
-        return className.equals(p) ? true : className.startsWith(p) && className.charAt(p.length()) == '.';
-    }
-
     @Override
     public void parseAnnotation(Object bean) {
         String cacheKey = Config.getCacheKey(bean.getClass());
+        if(withinPackage(bean)) {
+            Config.watchConfig.put(cacheKey, defaultDef);
+        }
+
         if (bean.getClass().isAnnotationPresent(Watch.class)) {
             if (!Config.watchConfig.containsKey(cacheKey)) {
                 Watch w = bean.getClass().getAnnotation(Watch.class);
@@ -58,8 +62,6 @@ public class WatchAnnotationParser implements Parser {
                     def.setThreshold(defaultDef.getThreshold());
                 }
                 Config.watchConfig.put(cacheKey, def);
-            } else {
-                Config.watchConfig.put(cacheKey, null);
             }
         }
 
@@ -77,8 +79,6 @@ public class WatchAnnotationParser implements Parser {
                         def.setThreshold(defaultDef.getThreshold());
                     }
                     Config.watchConfig.put(cacheKey, def);
-                } else {
-                    Config.watchConfig.put(cacheKey, null);
                 }
             }
         }

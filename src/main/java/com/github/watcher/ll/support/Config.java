@@ -12,7 +12,6 @@ import java.util.Map;
  */
 public class Config {
     private Config() {
-
     }
 
     public static final Map<String, WatchDefinition> watchConfig = new HashMap<>();

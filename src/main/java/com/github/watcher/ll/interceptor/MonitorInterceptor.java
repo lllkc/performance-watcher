@@ -20,37 +20,45 @@ public class MonitorInterceptor implements MethodInterceptor {
 
     @Override
     public Object invoke(MethodInvocation invocation) throws Throwable {
-        Object result;
+        Object result = null;
         Class cl = invocation.getThis().getClass();
         Method m = invocation.getMethod();
 
         String cacheKey = Config.getCacheKey(cl);
-        WatchDefinition wd = defaultDef;
-        if (Config.watchConfig.get(cacheKey) != null) {
-            wd = Config.watchConfig.get(cacheKey);
-        }
+        WatchDefinition wd = Config.watchConfig.get(cacheKey);
+
         cacheKey = Config.getCacheKey(cl, m);
         if (Config.watchConfig.get(cacheKey) != null) {
             wd = Config.watchConfig.get(cacheKey);
         }
 
-        logArguments(invocation);
+        if (null == wd) {
+            return invocation.proceed();
+        }
+
         long start = System.currentTimeMillis();
         try {
             result = invocation.proceed();
         } finally {
             long cost = System.currentTimeMillis() - start;
             if (cost >= wd.getThreshold()) {
+                LOGGER.info("[{}][{}]{}", invocation.getThis().getClass().getName(),
+                        invocation.getMethod().getName(),
+                        arguments(invocation));
                 LOGGER.info("[{}][{}] cost [{}] ms.", cl.getName(), m.getName(), cost);
+                LOGGER.info("[{}][{}] return value: {}", cl.getName(), m.getName(), result);
             } else {
+                LOGGER.debug("[{}][{}]{}", invocation.getThis().getClass().getName(),
+                        invocation.getMethod().getName(),
+                        arguments(invocation));
                 LOGGER.debug("[{}][{}] cost [{}] ms.", cl.getName(), m.getName(), cost);
+                LOGGER.debug("[{}][{}] return value: {}", cl.getName(), m.getName(), result);
             }
         }
-        LOGGER.info("[{}][{}] return value: {}", cl.getName(), m.getName(), result);
         return result;
     }
 
-    private void logArguments(MethodInvocation invocation) {
+    private String arguments(MethodInvocation invocation) {
         Object[] objects = invocation.getArguments();
         StringBuilder sb = new StringBuilder();
         sb.append(" Argument:");
@@ -59,9 +67,8 @@ public class MonitorInterceptor implements MethodInterceptor {
             sb.append(obj);
             sb.append("]");
         }
-        LOGGER.info("[{}][{}]{}", invocation.getThis().getClass().getName(),
-                invocation.getMethod().getName(),
-                sb.toString());
+        return sb.toString();
+
     }
 
     public WatchDefinition getDefaultDef() {
