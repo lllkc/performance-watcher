@@ -10,15 +10,16 @@
 
     <bean id="monitor" class="com.github.watcher.ll.interceptor.MonitorInterceptor">
         <property name="defaultDef" ref="default"/>
+        <property name="useDynamicLogger" value="${watch.useDynamicLogger:false}"/>
     </bean>
 
     <bean id="default" class="com.github.watcher.ll.anotation.DefaultWatchDefinition">
-        <property name="threshold" value="${monitor.threshold:-1}"/>
+        <property name="threshold" value="${watch.threshold:-1}"/>
     </bean>
 
     <bean class="com.github.watcher.ll.autoproxy.MonitorProxyCreator">
         <property name="parser" ref="parser"/>
-        <property name="switchOn" value="${watcher.enabled:true}"/>
+        <property name="switchOn" value="${watch.enabled:true}"/>
         <property name="interceptors">
             <list>
                 <ref bean="monitor"/>
