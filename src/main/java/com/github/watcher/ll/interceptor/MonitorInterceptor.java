@@ -1,7 +1,7 @@
 package com.github.watcher.ll.interceptor;
 
-import com.github.watcher.ll.support.Config;
 import com.github.watcher.ll.anotation.WatchDefinition;
+import com.github.watcher.ll.support.Config;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.slf4j.Logger;
@@ -14,9 +14,11 @@ import java.lang.reflect.Method;
  * @date: 2016/10/23.
  */
 public class MonitorInterceptor implements MethodInterceptor {
-    private static final Logger LOGGER = LoggerFactory.getLogger(MonitorInterceptor.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(MonitorInterceptor.class);
 
     private WatchDefinition defaultDef;
+
+    private boolean useDynamicLogger;
 
     @Override
     public Object invoke(MethodInvocation invocation) throws Throwable {
@@ -36,21 +38,21 @@ public class MonitorInterceptor implements MethodInterceptor {
             return invocation.proceed();
         }
 
+        if (useDynamicLogger) {
+            LOGGER = LoggerFactory.getLogger(cl);
+        }
+
         long start = System.currentTimeMillis();
         try {
             result = invocation.proceed();
         } finally {
             long cost = System.currentTimeMillis() - start;
             if (cost >= wd.getThreshold()) {
-                LOGGER.info("[{}][{}]{}", invocation.getThis().getClass().getName(),
-                        invocation.getMethod().getName(),
-                        arguments(invocation));
+                LOGGER.info("[{}][{}]{}", cl.getName(), m.getName(), arguments(invocation));
                 LOGGER.info("[{}][{}] cost [{}] ms.", cl.getName(), m.getName(), cost);
                 LOGGER.info("[{}][{}] return value: {}", cl.getName(), m.getName(), result);
             } else {
-                LOGGER.debug("[{}][{}]{}", invocation.getThis().getClass().getName(),
-                        invocation.getMethod().getName(),
-                        arguments(invocation));
+                LOGGER.debug("[{}][{}]{}", cl.getName(), m.getName(), arguments(invocation));
                 LOGGER.debug("[{}][{}] cost [{}] ms.", cl.getName(), m.getName(), cost);
                 LOGGER.debug("[{}][{}] return value: {}", cl.getName(), m.getName(), result);
             }
@@ -77,5 +79,13 @@ public class MonitorInterceptor implements MethodInterceptor {
 
     public void setDefaultDef(WatchDefinition defaultDef) {
         this.defaultDef = defaultDef;
+    }
+
+    public boolean isUseDynamicLogger() {
+        return useDynamicLogger;
+    }
+
+    public void setUseDynamicLogger(boolean useDynamicLogger) {
+        this.useDynamicLogger = useDynamicLogger;
     }
 }
