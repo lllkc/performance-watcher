@@ -14,7 +14,7 @@ import java.lang.reflect.Method;
  * @date: 2016/10/23.
  */
 public class MonitorInterceptor implements MethodInterceptor {
-    private static Logger LOGGER = LoggerFactory.getLogger(MonitorInterceptor.class);
+    private Logger LOGGER = LoggerFactory.getLogger(MonitorInterceptor.class);
 
     private WatchDefinition defaultDef;
 

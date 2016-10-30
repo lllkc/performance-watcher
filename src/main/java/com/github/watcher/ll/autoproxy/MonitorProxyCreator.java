@@ -71,11 +71,7 @@ public class MonitorProxyCreator extends AbstractAutoProxyCreator {
         this.parser = parser;
     }
 
-    public MethodInterceptor[] getInterceptors() {
-        return interceptors;
-    }
-
-    public void setInterceptors(MethodInterceptor[] interceptors) {
+    public void setInterceptors(MethodInterceptor... interceptors) {
         this.interceptors = interceptors;
     }
 
